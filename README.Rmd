@@ -16,41 +16,34 @@ knitr::opts_chunk$set(
 # enviromtx
 
 <!-- badges: start -->
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![CRAN status](https://www.r-pkg.org/badges/version/enviromtx)](https://CRAN.R-project.org/package=enviromtx)
 <!-- badges: end -->
 
-The goal of enviromtx is to ...
+The goal of `enviromtx` is to answer the question: Does the abundance of a given species impact another species' expression of a gene? 
+
 
 ## Installation
 
 You can install the development version of enviromtx like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+remotes::install_github("statdivlab/enviromtx")
 ```
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+This is a basic example which shows you how to fit the model. More documentation is coming soon! 
 
 ```{r example}
 library(enviromtx)
-## basic example code
-```
+set.seed(3)
+xx1 <- rpois(n, lambda=400)
+xstar1 <- rpois(n, lambda=400)
+beta0 <- 100
+beta1 <- 20
+yy1 <- rpois(n, xx1 * beta0 * (xstar1/xx1)^beta1)
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/v1/examples>.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+fit_mgx_model(yy = yy1,
+              xstar = xstar1,
+              xx = xx1,
+              replace_zeros=1)
+``` 
