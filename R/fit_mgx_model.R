@@ -1,5 +1,14 @@
 #' Fit model for fixed gene k, taxon j, taxon j*
 #'
+#' We would like to estimate beta1 in the model
+#' $Y_{ijk} \sim Poisson(X_{ij} \times c \times (\frac{X_{ij*}}{X_{ij}})^{\beta_1})$
+#' where
+#' $Y_{ijk}$ refers to data about the abundance of gene k expressed by taxon j in sample i
+#' $X_{ij}$ refers to data about the abundance of taxon j in sample i
+#' $X_{ij*}$ refers to data about the abundance of taxon j* in sample i
+#'
+#' We can then interpret, e.g., $1.01^{\beta_1}$ as the multiplicative change in the expression-per-unit-coverage of gene k in species j for 1\% increase in the coverage of species j compared to species j*. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the abundance (rather than just coverage) scale
+#'
 #' @param yy vector of abundances of gene k in taxon j
 #' @param xstar vector of abundances of taxon j*
 #' @param xx vector of abundances of taxon j
