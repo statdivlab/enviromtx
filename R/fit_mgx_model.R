@@ -40,6 +40,7 @@ fit_mgx_model <- function(yy, xstar, xx, wts = NULL, replace_zeros = "minimum") 
 
   if(any(apply(df, 2, is.infinite))) {
     print(df)
+    print(df, n = nrow(df))
     stop("Infinities in df?")
   }
 
@@ -66,3 +67,5 @@ fit_mgx_model <- function(yy, xstar, xx, wts = NULL, replace_zeros = "minimum") 
   simplified_output[2, ]
 
 }
+
+
