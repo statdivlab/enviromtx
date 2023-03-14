@@ -22,6 +22,7 @@
 #' @export
 fit_mgx_model <- function(yy, xstar, xx, wts = NULL, replace_zeros = "minimum") {
 
+  # Setting pseudocounts for xx and xstar 
   if (replace_zeros == "minimum") {
     xx[xx == 0] <- min(xx[xx > 0]) # cheap pseudocount - take minimum
   } else if (is.numeric(replace_zeros)) {
@@ -31,7 +32,16 @@ fit_mgx_model <- function(yy, xstar, xx, wts = NULL, replace_zeros = "minimum") 
 
   if (any(xx == 0)) stop("There are zeros in xx and you haven't told me what to do with them!")
 
+  if (replace_zeros == "minimum") {
+    xstar[xstar == 0] <- min(xstar[xstar > 0]) # cheap pseudocount - take minimum
+  } else if (is.numeric(replace_zeros)) {
+    if (replace_zeros == 0) stop("You've told me to replace zeroes with zero!")
+    xstar[xstar == 0] <- replace_zeros # cheap pseudocount - take minimum
+  }
+  
+  if (any(xstar == 0)) stop("There are zeros in xstar and you haven't told me what to do with them!")
 
+  
   # response <- yy / xx
   predictor <- log(xstar / xx)
 
