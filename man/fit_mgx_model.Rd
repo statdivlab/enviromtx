@@ -4,7 +4,15 @@
 \alias{fit_mgx_model}
 \title{Fit model for fixed gene k, taxon j, taxon j*}
 \usage{
-fit_mgx_model(yy, xstar, xx, wts = NULL, replace_zeros = "minimum")
+fit_mgx_model(
+  yy,
+  xstar,
+  xx,
+  formula = NULL,
+  enviro_df = NULL,
+  wts = NULL,
+  replace_zeros = "minimum"
+)
 }
 \arguments{
 \item{yy}{vector of abundances of gene k in taxon j}
@@ -13,18 +21,22 @@ fit_mgx_model(yy, xstar, xx, wts = NULL, replace_zeros = "minimum")
 
 \item{xx}{vector of abundances of taxon j}
 
+\item{formula}{a formula describing the environmental covariates that should be included in the model. The variable names should be columns in enviro_df}
+
+\item{enviro_df}{a data frame or tibble with columns containing environmental covariates that should be included in the model,}
+
 \item{wts}{vector of nonnegative weights. Could be sequencing depth to put more emphasis on deeply sequenced samples}
 
 \item{replace_zeros}{what to do with zeros in the denominator X_{ij}. Options include "minimum" or pseudocount numeric value (eg. 1)}
 }
 \description{
 We would like to estimate beta1 in the model
-$Y_{ijk} \sim Poisson(X_{ij} \times c \times (\frac{X_{ij*}}{X_{ij}})^{\beta_1})$
+Y_ijk ~ Poisson(X_ij * c * (X_{ij*} / X_{ij})^{beta_1})
 where
 $Y_{ijk}$ refers to data about the abundance of gene k expressed by taxon j in sample i
 $X_{ij}$ refers to data about the abundance of taxon j in sample i
 $X_{ij*}$ refers to data about the abundance of taxon j* in sample i
 }
 \details{
-We can then interpret, e.g., $1.01^{\beta_1}$ as the multiplicative change in the expression-per-unit-coverage of gene k in species j for 1\\% increase in the coverage of species j compared to species j*. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the abundance (rather than just coverage) scale
+We can then interpret, e.g., $1.01^{beta_1}$ as the multiplicative change in the expression-per-unit-coverage of gene k in species j for 1\\% increase in the coverage of species j compared to species j*. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the abundance (rather than just coverage) scale
 }
