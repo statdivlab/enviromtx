@@ -21,6 +21,7 @@
 #' @importFrom dplyr bind_cols
 #' @importFrom rigr regress
 #' @importFrom lazyeval f_new as_call
+#' @importFrom raoBust glm_test
 #'
 #'
 #' @export
@@ -90,22 +91,40 @@ fit_mgx_model <- function(yy, xstar, xx,
   ## log(E[Y]) = log(X) + beta0 + beta1 * log(X^*/X) + beta2 * salinity + beta3 * iron
   ## E[Y]/X = gamma0 * (X^*/X)^beta1 * e^(beta2*salinity + beta3*iron)
 
-  rigr_out <- suppressWarnings(rigr::regress("rate",
-                                             formula = my_formula,
-                                             offset=log(xx),
-                                             data=df,
-                                             weights=wts,
-                                             intercept=TRUE,
-                                             exponentiate=FALSE,
-                                             robustSE=TRUE))
+  # rigr_out <- suppressWarnings(rigr::regress("rate",
+  #                                            formula = my_formula,
+  #                                            offset=log(xx),
+  #                                            data=df,
+  #                                            weights=wts,
+  #                                            intercept=TRUE,
+  #                                            exponentiate=FALSE,
+  #                                            robustSE=TRUE))
+  # stop("no")
+
+
+
+  # raoBust_out <- coef(summary(glm(formula = my_formula,
+  #                      offset=log(xx),
+  #                      family=poisson(link="log"),
+  #                      data=df,
+  #                      weights=wts)))
+  raoBust_out <- raoBust::glm_test(formula = my_formula,
+                                   offset=log(xx),
+                                   family=poisson(link="log"),
+                                   data=df,
+                                   weights=wts)
+
+  # print(raoBust_out)
 
   ## this gives raw model, untransformed coefficients
 
   # Grab rob
-  simplified_output <- rigr_out$model[ , c("Estimate", "Robust SE", "F stat", "Pr(>F)")]
-  colnames(simplified_output) <- c("Estimate", "Robust SE", "Test Statistic", "p-value")
+  # simplified_output <- rigr_out$model[ , c("Estimate", "Robust SE", "F stat", "Pr(>F)")]
+  # colnames(simplified_output) <- c("Estimate", "Robust SE", "Test Statistic", "p-value")
 
-  simplified_output[-1, ]
+
+
+  raoBust_out[-1, ]
 
 }
 
