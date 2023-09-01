@@ -59,7 +59,7 @@ fit_mgx_model <- function(yy, xstar, xx,
     ## formula is yy ~ log(x*/x) + salinity + iron
     my_formula <- lazyeval::f_new(lhs=quote(yy),
                                   rhs = lazyeval::as_call(paste("predictor +", as.character(formula)[2])))
-    df <- dplyr::bind_cols(tibble(yy, xstar, xx, predictor), enviro_df)
+    df <- dplyr::bind_cols(tibble::tibble(yy, xstar, xx, predictor), enviro_df)
 
   } else if (xor(is.null(formula), is.null(enviro_df))) {
 
@@ -82,6 +82,7 @@ fit_mgx_model <- function(yy, xstar, xx,
   if (is.null(wts)) {
     wts <- rep(1, nrow(data.frame(df)))
   }
+  df$wts <- wts
 
   ################################################
   ## fit the model with Poisson regression
