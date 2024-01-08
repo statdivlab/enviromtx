@@ -8,6 +8,7 @@ fit_mgx_model(
   yy,
   xstar,
   xx,
+  replicates = NULL,
   formula = NULL,
   enviro_df = NULL,
   wts = NULL,

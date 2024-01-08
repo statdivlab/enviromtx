@@ -22,20 +22,28 @@
 #' @importFrom rigr regress
 #' @importFrom lazyeval f_new as_call
 #' @importFrom raoBust glm_test
+#' @import stats
+#' @import geepack
 #'
 #'
 #' @export
-fit_mgx_model <- function(yy, xstar, xx,
-                          formula = NULL,
-                          enviro_df = NULL,
-                          wts = NULL, replace_zeros = "minimum") {
+fit_mgx_model <- function(
+    yy,
+    xstar,
+    xx,
+    replicates = NULL,
+    formula = NULL,
+    enviro_df = NULL,
+    wts = NULL,
+    replace_zeros = "minimum"
+) {
 
   # Setting pseudocounts for xx and xstar
   if (replace_zeros == "minimum") {
     xx[xx == 0] <- min(xx[xx > 0]) # cheap pseudocount - take minimum
   } else if (is.numeric(replace_zeros)) {
     if (replace_zeros == 0) stop("You've told me to replace zeroes with zero!")
-    xx[xx == 0] <- replace_zeros # cheap pseudocount - take minimum
+    xx[xx == 0] <- replace_zeros
   }
   if (any(xx == 0)) stop("There are zeros in xx and you haven't told me what to do with them!")
 
@@ -43,7 +51,7 @@ fit_mgx_model <- function(yy, xstar, xx,
     xstar[xstar == 0] <- min(xstar[xstar > 0]) # cheap pseudocount - take minimum
   } else if (is.numeric(replace_zeros)) {
     if (replace_zeros == 0) stop("You've told me to replace zeroes with zero!")
-    xstar[xstar == 0] <- replace_zeros # cheap pseudocount - take minimum
+    xstar[xstar == 0] <- replace_zeros
   }
 
   if (any(xstar == 0)) stop("There are zeros in xstar and you haven't told me what to do with them!")
@@ -59,7 +67,7 @@ fit_mgx_model <- function(yy, xstar, xx,
     ## formula is yy ~ log(x*/x) + salinity + iron
     my_formula <- lazyeval::f_new(lhs=quote(yy),
                                   rhs = lazyeval::as_call(paste("predictor +", as.character(formula)[2])))
-    df <- dplyr::bind_cols(tibble::tibble(yy, xstar, xx, predictor), enviro_df)
+    my_df <- dplyr::bind_cols(tibble::tibble(yy, xstar, xx, predictor), enviro_df)
 
   } else if (xor(is.null(formula), is.null(enviro_df))) {
 
@@ -67,22 +75,23 @@ fit_mgx_model <- function(yy, xstar, xx,
 
   } else if (is.null(formula) & is.null(enviro_df)) {
 
-    df <- tibble::tibble(yy, xstar, xx, predictor)
+    my_df <- tibble::tibble(yy, xstar, xx, predictor)
     my_formula <- yy ~ predictor
+
 
   } else {
     stop("Ergh, there is an error and it is Amy's fault.")
   }
 
-  if(any(apply(df, 2, is.infinite))) {
-    print(df, n = nrow(df))
-    stop("Infinities in df? Amy's fault.")
+  if(any(apply(my_df, 2, is.infinite))) {
+    print(my_df, n = nrow(my_df))
+    stop("Infinities in my_df? Amy's fault.")
   }
 
   if (is.null(wts)) {
-    wts <- rep(1, nrow(data.frame(df)))
+    wts <- rep(1L, nrow(data.frame(my_df)))
   }
-  df$wts <- wts
+  my_df$wts <- wts
 
   ################################################
   ## fit the model with Poisson regression
@@ -92,38 +101,31 @@ fit_mgx_model <- function(yy, xstar, xx,
   ## log(E[Y]) = log(X) + beta0 + beta1 * log(X^*/X) + beta2 * salinity + beta3 * iron
   ## E[Y]/X = gamma0 * (X^*/X)^beta1 * e^(beta2*salinity + beta3*iron)
 
-  # rigr_out <- suppressWarnings(rigr::regress("rate",
-  #                                            formula = my_formula,
-  #                                            offset=log(xx),
-  #                                            data=df,
-  #                                            weights=wts,
-  #                                            intercept=TRUE,
-  #                                            exponentiate=FALSE,
-  #                                            robustSE=TRUE))
-  # stop("no")
+  # raoBust_out <- eval(rlang::expr(raoBust::glm_test( TODO )),
+  #                     envir = .env)
 
+  if (is.null(replicates)) {
+    raoBust_out <- raoBust::glm_test(formula = my_formula,
+                                     offset=log(xx),
+                                     family=stats::poisson(link="log"),
+                                     data=my_df,
+                                     weights=wts)
+  } else {
+    if (!all(wts == 1L)) {
+      warning("Run this by Amy; not sure what this is doing off-the-cuff")
+    }
+    my_df$id <- replicates
 
+    raoBust_out <- raoBust::gee_test(formula = my_formula,
+                                     offset=log(xx),
+                                     family=stats::poisson(link="log"),
+                                     id=id,
+                                     # weights=wts,
+                                     data=my_df)
+  }
 
-  # raoBust_out <- coef(summary(glm(formula = my_formula,
-  #                      offset=log(xx),
-  #                      family=poisson(link="log"),
-  #                      data=df,
-  #                      weights=wts)))
-  raoBust_out <- raoBust::glm_test(formula = my_formula,
-                                   offset=log(xx),
-                                   family=poisson(link="log"),
-                                   data=df,
-                                   weights=wts)
-
-  # print(raoBust_out)
 
   ## this gives raw model, untransformed coefficients
-
-  # Grab rob
-  # simplified_output <- rigr_out$model[ , c("Estimate", "Robust SE", "F stat", "Pr(>F)")]
-  # colnames(simplified_output) <- c("Estimate", "Robust SE", "Test Statistic", "p-value")
-
-
 
   raoBust_out[-1, ]
 
