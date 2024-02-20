@@ -22,6 +22,8 @@ fit_mgx_model(
 
 \item{xx}{vector of abundances of taxon j}
 
+\item{replicates}{vector that contains the same entries for all observations that are technical replicates. Will be coerced to a factor down the line.}
+
 \item{formula}{a formula describing the environmental covariates that should be included in the model. The variable names should be columns in enviro_df}
 
 \item{enviro_df}{a data frame or tibble with columns containing environmental covariates that should be included in the model,}

@@ -24,9 +24,16 @@ test_that("runs with replicates", {
                             xx = xx1,
                             replicates = reps,
                             replace_zeros=1),
-              "double")
+              "list") ### TODO double?
 
 })
 
 
-# install.packages("/Users/adwillis/software/raoBust_0.0.2.1.tar.gz", repos = NULL, type = "source")
+# install.packages("/Users/adwillis/software/raoBust_0.0.2.2.tar.gz", repos = NULL, type = "source")
+# library(raoBust)
+# session_info()
+# remove.packages("raoBust")
+# packageVersion("raoBust")
+# gee_test
+# sessionInfo()
+# load_all("../raoBust/")

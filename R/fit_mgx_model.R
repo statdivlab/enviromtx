@@ -12,6 +12,7 @@
 #' @param yy vector of abundances of gene k in taxon j
 #' @param xstar vector of abundances of taxon j*
 #' @param xx vector of abundances of taxon j
+#' @param replicates vector that contains the same entries for all observations that are technical replicates. Will be coerced to a factor down the line.
 #' @param formula a formula describing the environmental covariates that should be included in the model. The variable names should be columns in enviro_df
 #' @param enviro_df a data frame or tibble with columns containing environmental covariates that should be included in the model,
 #' @param wts vector of nonnegative weights. Could be sequencing depth to put more emphasis on deeply sequenced samples
