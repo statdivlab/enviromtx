@@ -20,6 +20,8 @@ test_that("environmental covariates work", {
                            formula = ~ temp + salinity,
                            enviro_df = cbind(temp, salinity))
 
+  expect_warning(fit_mgx_model(yy_i_k, xstar_i, xx_i))
+
   expect_type(out_i_k, "double")
 
   predictor <- log(xstar_i / xx_i)
