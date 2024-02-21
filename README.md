@@ -4,6 +4,9 @@
 # enviromtx
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/statdivlab/enviromtx/workflows/R-CMD-check/badge.svg)](https://github.com/statdivlab/enviromtx/actions)
+[![codecov](https://codecov.io/github/statdivlab/enviromtx/coverage.svg?branch=main)](https://app.codecov.io/github/statdivlab/enviromtx)
 <!-- badges: end -->
 
 The goal of `enviromtx` is to answer the question: Does the abundance of
