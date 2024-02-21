@@ -18,4 +18,4 @@ Imports:
     raoBust,
     rigr,
     tibble
-Additional_repositories: https://github.com/statdivlab/raoBust
+Remotes: statdivlab/raoBust
