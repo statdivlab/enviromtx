@@ -16,18 +16,28 @@ test_that("environmental covariates work", {
   temp <- rnorm(nn, mean=23, sd = 2)
   salinity <- rnorm(nn, mean=35, sd = 5)
 
-  out_i_k <- fit_mgx_model(yy_i_k, xstar_i, xx_i,
+  expect_silent(out_i_k <- fit_mgx_model(yy_i_k, xstar_i, xx_i,
                            formula = ~ temp + salinity,
-                           enviro_df = cbind(temp, salinity))
+                           enviro_df = cbind(temp, salinity)))
 
-  expect_warning(fit_mgx_model(yy_i_k, xstar_i, xx_i))
-
-  expect_type(out_i_k, "double")
+  expect_type(out_i_k[1,1], "double")
 
   predictor <- log(xstar_i / xx_i)
   glm_coefs <- suppressWarnings(coef(glm(yy_i_k ~ predictor + temp + salinity,
                                          family=poisson(link="log"), offset=log(xx_i)))[-1])
   glm_coefs
-  expect_true(all(out_i_k[, 1] == glm_coefs))
+  expect_true(all(out_i_k[1:3, 1] == glm_coefs))
+
+
+  expect_warning(fit_mgx_model(yy_i_k, xstar_i, xx_i))
+
+
+  ### test with replicates
+  expect_silent(out_i_k_rep <- fit_mgx_model(yy_i_k, xstar_i, xx_i,
+                           formula = ~ temp + salinity,
+                           replicates=rep(LETTERS[1:10], each = 3),
+                           enviro_df = cbind(temp, salinity)))
+  expect_type(out_i_k_rep[1,1], "double")
+
 
 })

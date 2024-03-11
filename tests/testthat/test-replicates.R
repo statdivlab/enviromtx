@@ -17,14 +17,12 @@ test_that("runs with replicates", {
                             replace_zeros=1),
               "double")
 
-  ### does not work
-  # Error in eval(cl$data) : object 'my_df' not found
   expect_type(fit_mgx_model(yy = yy1,
                             xstar = xstar1,
                             xx = xx1,
                             replicates = reps,
                             replace_zeros=1),
-              "list") ### TODO double?
+              "list")
 
 })
 
