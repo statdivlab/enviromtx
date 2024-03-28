@@ -25,6 +25,7 @@
 #' @importFrom raoBust glm_test
 #' @import stats
 #' @import geepack
+#' @import geeasy
 #'
 #'
 #' @export
