@@ -24,6 +24,15 @@ test_that("runs with replicates", {
                             replace_zeros=1),
               "list")
 
+  # test using jackknife standard errors instead of sandwich standard errors
+  expect_type(fit_mgx_model(yy = yy1,
+                            xstar = xstar1,
+                            xx = xx1,
+                            replicates = reps,
+                            replace_zeros=1,
+                            use_jack_se = TRUE),
+              "list")
+
 })
 
 
