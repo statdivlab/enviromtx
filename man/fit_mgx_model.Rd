@@ -12,7 +12,8 @@ fit_mgx_model(
   formula = NULL,
   enviro_df = NULL,
   wts = NULL,
-  replace_zeros = "minimum"
+  replace_zeros = "minimum",
+  use_jack_se = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ fit_mgx_model(
 \item{wts}{vector of nonnegative weights. Could be sequencing depth to put more emphasis on deeply sequenced samples}
 
 \item{replace_zeros}{what to do with zeros in the denominator X_{ij}. Options include "minimum" or pseudocount numeric value (eg. 1)}
+
+\item{use_jack_se}{when replicates are given, if TRUE will use jackknife standard errors instead of sandwich standard errors. This is recommended when
+there is a small number of clusters.}
 }
 \description{
 We would like to estimate beta1 in the model

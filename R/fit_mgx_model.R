@@ -17,6 +17,8 @@
 #' @param enviro_df a data frame or tibble with columns containing environmental covariates that should be included in the model,
 #' @param wts vector of nonnegative weights. Could be sequencing depth to put more emphasis on deeply sequenced samples
 #' @param replace_zeros what to do with zeros in the denominator X_{ij}. Options include "minimum" or pseudocount numeric value (eg. 1)
+#' @param use_jack_se when replicates are given, if TRUE will use jackknife standard errors instead of sandwich standard errors. This is recommended when
+#' there is a small number of clusters.
 #'
 #' @importFrom tibble tibble
 #' @importFrom dplyr bind_cols
@@ -37,7 +39,8 @@ fit_mgx_model <- function(
     formula = NULL,
     enviro_df = NULL,
     wts = NULL,
-    replace_zeros = "minimum"
+    replace_zeros = "minimum",
+    use_jack_se = FALSE
 ) {
 
   # Setting pseudocounts for xx and xstar
@@ -123,7 +126,8 @@ fit_mgx_model <- function(
                                      family=stats::poisson(link="log"),
                                      id=id,
                                      # weights=wts,
-                                     data=my_df)
+                                     data=my_df,
+                                     use_jack_se = use_jack_se)
   }
 
 
