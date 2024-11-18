@@ -19,6 +19,8 @@
 #' @param replace_zeros what to do with zeros in the denominator X_{ij}. Options include "minimum" or pseudocount numeric value (eg. 1)
 #' @param use_jack_se when replicates are given, if TRUE will use jackknife standard errors instead of sandwich standard errors. This is recommended when
 #' there is a small number of clusters.
+#' @param cluster_corr_coef when replicates are given, estimated value of the within-cluster correlation coefficient. This will only be used when gee estimation in `raoBust::gee_test` fails, and instead
+#' estimation is performed with a glm. This is set to NULL by default.
 #'
 #' @importFrom tibble tibble
 #' @importFrom dplyr bind_cols
@@ -40,7 +42,8 @@ fit_mgx_model <- function(
     enviro_df = NULL,
     wts = NULL,
     replace_zeros = "minimum",
-    use_jack_se = FALSE
+    use_jack_se = FALSE,
+    cluster_corr_coef = NULL
 ) {
 
   # Setting pseudocounts for xx and xstar
@@ -127,7 +130,8 @@ fit_mgx_model <- function(
                                      id=id,
                                      # weights=wts,
                                      data=my_df,
-                                     use_jack_se = use_jack_se)
+                                     use_jack_se = use_jack_se,
+                                     cluster_corr_coef = cluster_corr_coef)
   }
 
 

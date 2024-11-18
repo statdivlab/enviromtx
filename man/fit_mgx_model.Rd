@@ -13,7 +13,8 @@ fit_mgx_model(
   enviro_df = NULL,
   wts = NULL,
   replace_zeros = "minimum",
-  use_jack_se = FALSE
+  use_jack_se = FALSE,
+  cluster_corr_coef = NULL
 )
 }
 \arguments{
@@ -35,6 +36,9 @@ fit_mgx_model(
 
 \item{use_jack_se}{when replicates are given, if TRUE will use jackknife standard errors instead of sandwich standard errors. This is recommended when
 there is a small number of clusters.}
+
+\item{cluster_corr_coef}{when replicates are given, estimated value of the within-cluster correlation coefficient. This will only be used when gee estimation in \code{raoBust::gee_test} fails, and instead
+estimation is performed with a glm. This is set to NULL by default.}
 }
 \description{
 We would like to estimate beta1 in the model
