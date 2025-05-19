@@ -117,7 +117,7 @@ fit_mgx_model <- function(
                                      offset=log(xx),
                                      family=stats::poisson(link="log"),
                                      data=my_df,
-                                     weights=wts)
+                                     weights=wts)$coef_tab
   } else {
     if (!all(wts == 1L)) {
       warning("Run this by Amy; not sure what this is doing off-the-cuff")
@@ -131,7 +131,7 @@ fit_mgx_model <- function(
                                      # weights=wts,
                                      data=my_df,
                                      use_jack_se = use_jack_se,
-                                     cluster_corr_coef = cluster_corr_coef)
+                                     cluster_corr_coef = cluster_corr_coef)$coef_tab
   }
 
 
