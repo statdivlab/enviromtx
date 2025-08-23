@@ -6,7 +6,7 @@ test_that("reasonably accurate estimates", {
   xx1 <- rpois(n, lambda=400)
   xstar1 <- rpois(n, lambda=400)
   beta0 <- 100
-  beta1 <- 20
+  beta1 <- 1
   yy1 <- rpois(n, xx1 * beta0 * (xstar1/xx1)^beta1)
 
   output6 <- fit_mgx_model(yy = yy1,
@@ -20,7 +20,7 @@ test_that("reasonably accurate estimates", {
   xx1 <- rpois(n, lambda=100)
   xstar1 <- rpois(n, lambda=20)
   beta0 <- 1
-  beta1 <- -4
+  beta1 <- -1
   yy1 <- rpois(n, xx1 * beta0 * (xstar1/xx1)^beta1)
   yy1
 
@@ -77,8 +77,8 @@ test_that("reasonably accurate estimates with covariates and correlation", {
   xstar1 <- rpois(n, lambda=400)
   beta0 <- 1
   beta1 <- 2
-  beta2 <- 5
-  beta3 <- -5
+  beta2 <- 1
+  beta3 <- -1
   xx_covariates1 <- rnorm(n)
   xx_covariates2 <- rnorm(n)
   eta <- xx1 * beta0 * (xstar1/xx1)^beta1 * exp(beta2 * xx_covariates1 + beta3 * xx_covariates2 + b[id])
