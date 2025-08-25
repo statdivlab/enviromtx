@@ -17,6 +17,5 @@ Imports:
     geeasy,
     lazyeval, 
     raoBust,
-    rigr,
     tibble
 Remotes: statdivlab/raoBust

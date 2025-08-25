@@ -24,7 +24,6 @@
 #'
 #' @importFrom tibble tibble
 #' @importFrom dplyr bind_cols
-#' @importFrom rigr regress
 #' @importFrom lazyeval f_new as_call
 #' @importFrom raoBust glm_test
 #' @import stats
