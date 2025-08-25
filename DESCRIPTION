@@ -18,7 +18,6 @@ Imports:
     geepack,
     geeasy,
     lazyeval, 
-    raoBust  (>= 1.1.1),
-    rigr,
+    raoBust (>= 1.1.1),
     tibble
 Remotes: statdivlab/raoBust

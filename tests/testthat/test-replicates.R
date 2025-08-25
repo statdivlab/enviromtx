@@ -35,12 +35,3 @@ test_that("runs with replicates", {
 
 })
 
-
-# install.packages("/Users/adwillis/software/raoBust_0.0.2.2.tar.gz", repos = NULL, type = "source")
-# library(raoBust)
-# session_info()
-# remove.packages("raoBust")
-# packageVersion("raoBust")
-# gee_test
-# sessionInfo()
-# load_all("../raoBust/")

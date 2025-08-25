@@ -32,7 +32,7 @@ fit_mgx_model(
 
 \item{wts}{vector of nonnegative weights. Could be sequencing depth to put more emphasis on deeply sequenced samples}
 
-\item{replace_zeros}{what to do with zeros in the denominator X_{ij}. Options include "minimum" or pseudocount numeric value (eg. 1)}
+\item{replace_zeros}{what to do with zeros in the denominator \eqn{X_{ij}}. Options include "minimum" or pseudocount numeric value (eg. 1)}
 
 \item{use_jack_se}{when replicates are given, if TRUE will use jackknife standard errors instead of sandwich standard errors. This is recommended when
 there is a small number of clusters.}
@@ -42,12 +42,12 @@ estimation is performed with a glm. This is set to NULL by default.}
 }
 \description{
 We would like to estimate beta1 in the model
-Y_ijk ~ Poisson(X_ij * c * (X_{ij*} / X_{ij})^{beta_1})
+\eqn{Y_ijk ~ Poisson(X_ij * c * (X_{ij*} / X_{ij})^{beta_1})}
 where
-$Y_{ijk}$ refers to data about the abundance of gene k expressed by taxon j in sample i
-$X_{ij}$ refers to data about the abundance of taxon j in sample i
-$X_{ij*}$ refers to data about the abundance of taxon j* in sample i
+\eqn{Y_{ijk}} refers to data about the abundance of gene k expressed by taxon j in sample i
+\eqn{X_{ij}} refers to data about the abundance of taxon j in sample i
+\eqn{X_{ij*}} refers to data about the abundance of taxon j* in sample i
 }
 \details{
-We can then interpret, e.g., $1.01^{beta_1}$ as the multiplicative change in the expression-per-unit-coverage of gene k in species j for 1\\% increase in the coverage of species j compared to species j*. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the abundance (rather than just coverage) scale
+We can then interpret, e.g., \eqn{1.01^{beta_1}} as the multiplicative change in the expression-per-unit-coverage of gene k in species j for 1\\% increase in the coverage of species j compared to species j*. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the abundance (rather than just coverage) scale
 }
