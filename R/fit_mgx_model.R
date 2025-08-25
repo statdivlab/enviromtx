@@ -1,13 +1,13 @@
 #' Fit model for fixed gene k, taxon j, taxon j*
 #'
 #' We would like to estimate beta1 in the model
-#' Y_ijk ~ Poisson(X_ij * c * (X_{ij*} / X_{ij})^{beta_1})
+#' \eqn{Y_ijk ~ Poisson(X_ij * c * (X_{ij*} / X_{ij})^{beta_1})}
 #' where
-#' $Y_{ijk}$ refers to data about the abundance of gene k expressed by taxon j in sample i
-#' $X_{ij}$ refers to data about the abundance of taxon j in sample i
-#' $X_{ij*}$ refers to data about the abundance of taxon j* in sample i
+#' \eqn{Y_{ijk}} refers to data about the abundance of gene k expressed by taxon j in sample i
+#' \eqn{X_{ij}} refers to data about the abundance of taxon j in sample i
+#' \eqn{X_{ij*}} refers to data about the abundance of taxon j* in sample i
 #'
-#' We can then interpret, e.g., $1.01^{beta_1}$ as the multiplicative change in the expression-per-unit-coverage of gene k in species j for 1\% increase in the coverage of species j compared to species j*. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the abundance (rather than just coverage) scale
+#' We can then interpret, e.g., \eqn{1.01^{beta_1}} as the multiplicative change in the expression-per-unit-coverage of gene k in species j for 1\% increase in the coverage of species j compared to species j*. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the abundance (rather than just coverage) scale
 #'
 #' @param yy vector of abundances of gene k in taxon j
 #' @param xstar vector of abundances of taxon j*
@@ -16,7 +16,7 @@
 #' @param formula a formula describing the environmental covariates that should be included in the model. The variable names should be columns in enviro_df
 #' @param enviro_df a data frame or tibble with columns containing environmental covariates that should be included in the model,
 #' @param wts vector of nonnegative weights. Could be sequencing depth to put more emphasis on deeply sequenced samples
-#' @param replace_zeros what to do with zeros in the denominator X_{ij}. Options include "minimum" or pseudocount numeric value (eg. 1)
+#' @param replace_zeros what to do with zeros in the denominator \eqn{X_{ij}}. Options include "minimum" or pseudocount numeric value (eg. 1)
 #' @param use_jack_se when replicates are given, if TRUE will use jackknife standard errors instead of sandwich standard errors. This is recommended when
 #' there is a small number of clusters.
 #' @param cluster_corr_coef when replicates are given, estimated value of the within-cluster correlation coefficient. This will only be used when gee estimation in `raoBust::gee_test` fails, and instead
@@ -126,7 +126,7 @@ fit_mgx_model <- function(
     raoBust_out <- raoBust::gee_test(formula = my_formula,
                                      offset=log(xx),
                                      family=stats::poisson(link="log"),
-                                     id=id,
+                                     id="id",
                                      # weights=wts,
                                      data=my_df,
                                      use_jack_se = use_jack_se,

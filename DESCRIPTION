@@ -1,8 +1,10 @@
 Package: enviromtx
-Title: Analyzing Environmental Metatranscriptomics Data
-Version: 0.0.4
+Title: Predicting Species-Species Interactions from Environmental Metatranscriptomics Data
+Version: 0.1.0
 Authors@R: 
-    person("Amy D", "Willis", email = "adwillis@uw.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-2802-4317"))
+    c(person("Amy D", "Willis", email = "adwillis@uw.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-2802-4317")),
+      person("Sarah", "Teichman", role = "aut"),
+      person("Zinka", "Bartolek", role = "aut"))
 Description: Tools to answer the question: Does the abundance of a given species impact another species' expression of a gene? 
 License: MIT + file LICENSE
 Suggests: 
@@ -16,6 +18,6 @@ Imports:
     geepack,
     geeasy,
     lazyeval, 
-    raoBust,
+    raoBust (>= 1.1.1),
     tibble
 Remotes: statdivlab/raoBust

@@ -17,8 +17,8 @@ test_that("environmental covariates work", {
   salinity <- rnorm(nn, mean=35, sd = 5)
 
   expect_silent(out_i_k <- fit_mgx_model(yy_i_k, xstar_i, xx_i,
-                           formula = ~ temp + salinity,
-                           enviro_df = cbind(temp, salinity)))
+                                         formula = ~ temp + salinity,
+                                         enviro_df = cbind(temp, salinity)))
 
   expect_type(out_i_k[1,1], "double")
 
@@ -34,9 +34,9 @@ test_that("environmental covariates work", {
 
   ### test with replicates
   expect_silent(out_i_k_rep <- fit_mgx_model(yy_i_k, xstar_i, xx_i,
-                           formula = ~ temp + salinity,
-                           replicates=rep(LETTERS[1:10], each = 3),
-                           enviro_df = cbind(temp, salinity)))
+                                             formula = ~ temp + salinity,
+                                             replicates=rep(LETTERS[1:10], each = 3),
+                                             enviro_df = cbind(temp, salinity)))
   expect_type(out_i_k_rep[1,1], "double")
 
 
