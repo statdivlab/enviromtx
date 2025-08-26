@@ -26,13 +26,13 @@ fit_mgx_model(
 
 \item{xx}{The name of the column in \code{enviro_df} containing abundances of the responder taxon. Default is "xx". In the above notation, this corresponds to the abundance of taxon \eqn{j}.}
 
-\item{replicates}{The name of the column in \code{enviro_df} containing technical replicate information. Entries in this column should be the same within observations that are technical replicates. Will be coerced to a factor internally. Default is \code{NULL}.}
+\item{replicates}{The name of the column in \code{enviro_df} containing technical replicate information. Entries in this column should be the same within observations that are technical replicates. Will be coerced to a factor internally. Default is \code{NULL} (no samples have technical replicates; all samples are independent).}
 
-\item{formula}{a formula describing the environmental covariates that should be included in the model. The variable names should be columns in \code{enviro_df}}
+\item{formula}{A formula describing the environmental covariates that should be included in the model. The variable names should be columns in \code{enviro_df}}
 
-\item{wts}{The name of the column in \code{enviro_df} containing nonnegative weights for the observation. Could be sequencing depth to put more emphasis on deeply sequenced samples. Default is \code{NULL}.}
+\item{wts}{The name of the column in \code{enviro_df} containing nonnegative weights for the observation. Could be sequencing depth to put more emphasis on deeply sequenced samples. Default is \code{NULL} (all observations contribute equally to the likelihood).}
 
-\item{replace_zeros}{what to do with zeros in the denominator \eqn{X_{ij}}. Options include "minimum" (replace with the smallest value) or pseudocount numeric value (eg. 1). Default is "minimum".}
+\item{replace_zeros}{What to replace zeros with in the denominator \eqn{X_{ij}}. Options include "minimum" (replace with the smallest value) or pseudocount numeric value (eg. 1). Default is "minimum".}
 
 \item{use_jack_se}{Boolean indicating whether to use jackknife standard errors (TRUE) rather than sandwich standard errors (FALSE). Only relevant if technical replicates are included. Jackknife standard errors are recommended when
 there are a small number of observations. Defaults to FALSE.}
@@ -48,7 +48,7 @@ where
 \eqn{X_{ij}} refers to the observed abundance of taxon \eqn{j} in sample \eqn{i},
 \eqn{X_{ij^*}} refers to the observed abundance of taxon \eqn{j^*} in sample \eqn{i}, and
 \eqn{W_{im}} is the value of abiotic covariate \eqn{m} observed in sample \eqn{i}.
-We can interpret \eqn{1.01^{\beta_1}} as the multiplicative change in the expression-per-unit-coverage of gene \eqn{k} in species \eqn{j} for 1\\\% increase in the coverage of species \eqn{j} compared to species \eqn{j^*}. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the true cell abundance scale (rather than just the coverage scale).
+We can interpret \eqn{1.01^{\beta_1}} as the multiplicative change in the expression-per-unit-coverage of gene \eqn{k} in species \eqn{j} for 1\\\% increase in the coverage of species \eqn{j} compared to species \eqn{j^*}, when comparing samples with the same values of the abiotic covariates. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the true cell abundance scale (rather than just the coverage scale).
 }
 \examples{
 my_df <- data.frame(xx = rpois(20, lambda = 400),

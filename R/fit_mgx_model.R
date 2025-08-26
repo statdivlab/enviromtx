@@ -130,11 +130,24 @@ fit_mgx_model <- function(
     my_df <- dplyr::bind_cols(tibble::tibble(predictor), enviro_df)
 
   }
-#
-#   if(any(apply(my_df, 2, is.infinite))) {
-#     print(my_df, n = nrow(my_df))
-#     stop("Infinities in my_df? Amy's fault.")
-#   }
+
+  # check for infinite values in my_df
+  if (!is.null(wts)) {
+    if (any(is.infinite(my_df[[wts]]))) {
+      stop("At least one weight provided is infinite. Please fix this and then rerun.")
+    }
+  }
+  if (!is.null(replicates)) {
+    if (any(is.infinite(my_df[[replicates]]))) {
+      stop("At least one replicate provided is infinite. Please fix this and then rerun.")
+    }
+  }
+  covs <- all.vars(update(formula, . ~ .))[-1]
+  for (i in 1:length(covs)) {
+    if (any(is.infinite(my_df[[covs[i]]]))) {
+      stop(paste0("At least one value of covariate ", covs[i], " is infinite. Please fix this and rerun."))
+    }
+  }
 
   if (is.null(wts)) {
     my_df$wts <- rep(1L, nrow(my_df))
