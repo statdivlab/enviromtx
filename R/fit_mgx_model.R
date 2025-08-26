@@ -21,6 +21,10 @@
 #' there is a small number of clusters.
 #' @param cluster_corr_coef when replicates are given, estimated value of the within-cluster correlation coefficient. This will only be used when gee estimation in `raoBust::gee_test` fails, and instead
 #' estimation is performed with a glm. This is set to NULL by default.
+#' @param control a list of control parameters.
+#'    Defaults are \code{list(center = TRUE)}}.
+#'    Users can override some or all of these.
+#'    If \code{center = TRUE}, then covariates will be centered before being included in the model.
 #'
 #' @importFrom tibble tibble
 #' @importFrom dplyr bind_cols
@@ -42,8 +46,13 @@ fit_mgx_model <- function(
     wts = NULL,
     replace_zeros = "minimum",
     use_jack_se = FALSE,
-    cluster_corr_coef = NULL
+    cluster_corr_coef = NULL,
+    control = list()
 ) {
+
+  # merge user-supplied control arguments with default
+  defaults <- list(center = TRUE)
+  control <- modifyList(defaults, control)
 
   # Setting pseudocounts for xx and xstar
   if (replace_zeros == "minimum") {
@@ -99,6 +108,11 @@ fit_mgx_model <- function(
     wts <- rep(1L, nrow(data.frame(my_df)))
   }
   my_df$wts <- wts
+
+  # center covariates if desired
+  if (control$center) {
+
+  }
 
   ################################################
   ## fit the model with Poisson regression
