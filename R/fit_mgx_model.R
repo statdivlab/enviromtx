@@ -172,7 +172,7 @@ fit_mgx_model <- function(
   # center covariates if desired
   if (control$center) {
     # get variable names from the formula
-    vars <- all.vars(update(formula, . ~ .))[-1]  # drop response
+    vars <- setdiff(all.vars(update(formula, . ~ .))[-1], "predictor")
 
     # copy data so we don't overwrite
     data_centered <- my_df
@@ -181,7 +181,7 @@ fit_mgx_model <- function(
     for (v in vars) {
       is_binary <- length(unique(my_df[[v]])) < 3
       if (is.numeric(my_df[[v]]) & !is_binary) {
-        data_centered[[v]] <- scale(my_df[[v]], center = TRUE, scale = FALSE)
+        data_centered[[v]] <- my_df[[v]] - mean(my_df[[v]], na.rm = TRUE)
       }
     }
 

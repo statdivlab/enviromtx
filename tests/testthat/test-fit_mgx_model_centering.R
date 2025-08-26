@@ -75,6 +75,68 @@ test_that("with large parameter values, centering improves estimation", {
 
   skip("Skip longer sim study in automatic testing")
 
+  n <- 20
+
+  # large B values
+  set.seed(4)
+  xx1 <- rpois(n, lambda=400)
+  xstar1 <- rpois(n, lambda=400)
+  beta0 <- 10
+  beta1 <- 20
+  beta2 <- 30
+  beta3 <- -1
+  xx_covariates1 <- rnorm(n)
+  xx_covariates2 <- rnorm(n)
+  yy1 <- rpois(n, xx1 * beta0 * (xstar1/xx1)^beta1 * exp(beta2 * xx_covariates1 + beta3 * xx_covariates2))
+  output1 <- fit_mgx_model(data.frame(yy = yy1,
+                                      xstar = xstar1,
+                                      xx = xx1,
+                                      xx_covariates1,
+                                      xx_covariates2),
+                           formula= ~ xx_covariates1 + xx_covariates2,
+                           replace_zeros=1)
+  output2 <- fit_mgx_model(data.frame(yy = yy1,
+                                      xstar = xstar1,
+                                      xx = xx1,
+                                      xx_covariates1,
+                                      xx_covariates2),
+                           formula= ~ xx_covariates1 + xx_covariates2,
+                           replace_zeros=1,
+                           control = list(center = FALSE))
+
+  expect_true(all.equal(output1, output2))
+
+
+  # large covariate values
+  n <- 20
+  set.seed(3)
+  xx1 <- rpois(n, lambda=400)
+  xstar1 <- rpois(n, lambda=400)
+  beta0 <- 1.5
+  beta1 <- -1
+  beta2 <- 1
+  beta3 <- 0
+  xx_covariates1 <- rnorm(n) + 20
+  xx_covariates2 <- rnorm(n)
+  yy1 <- rpois(n, xx1 * beta0 * (xstar1/xx1)^beta1 * exp(beta2 * xx_covariates1 + beta3 * xx_covariates2))
+  output_center <- fit_mgx_model(data.frame(yy = yy1,
+                                            xstar = xstar1,
+                                            xx = xx1,
+                                            xx_covariates1,
+                                            xx_covariates2),
+                                 formula= ~ xx_covariates1 + xx_covariates2,
+                                 replace_zeros=1)
+  output_nocenter <- fit_mgx_model(data.frame(yy = yy1,
+                                      xstar = xstar1,
+                                      xx = xx1,
+                                      xx_covariates1,
+                                      xx_covariates2),
+                           formula= ~ xx_covariates1 + xx_covariates2,
+                           replace_zeros=1,
+                           control = list(center = FALSE))
+
+  expect_true(all.equal(output1, output2))
+
 })
 
 test_that("with null parameter values, centering does not affect t1e control", {
