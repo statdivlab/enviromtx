@@ -13,20 +13,20 @@ test_that("runs with replicates", {
   yy1 <- rpois(n, xx1 * beta0 * (xstar1/xx1)^beta1)
 
   ## works fine
-  expect_type(fit_mgx_model(yy = yy1,
+  expect_type(fit_mgx_model(data.frame(yy = yy1,
                 xstar = xstar1,
-                xx = xx1,
+                xx = xx1),
                 replace_zeros=1),
               "double")
 
   ### does not work
   # Error in eval(cl$data) : object 'my_df' not found
-  expect_type(fit_mgx_model(yy = yy1,
+  expect_type(fit_mgx_model(data.frame(yy = yy1,
                 xstar = xstar1,
-                xx = xx1,
-                replicates = reps,
+                xx = xx1, reps),
+                replicates = "reps",
                 replace_zeros=1),
-              "double")
+              "list")
 
 })
 

@@ -20,14 +20,14 @@ test_that("reasonably accurate estimates with covariates and correlation", {
   # yy1 <- rpois(n, lambda=eta)
   yy1 <- rnbinom(n, mu=eta, size=eta^2)
 
-  my_df <- tibble(yy1, xx1, predictor = log((xstar1)/(xx1)), xx_covariates1, xx_covariates2, id)
+  my_df <- tibble(yy1, xx1, xstar1, xx_covariates1, xx_covariates2, id)
 
-  output10 <- fit_mgx_model(yy = yy1,
-                            xstar = xstar1,
-                            xx = xx1,
+  output10 <- fit_mgx_model(enviro_df = my_df,
+                            yy = "yy1",
+                            xx = "xx1",
+                            xstar = "xstar1",
                             formula= ~ xx_covariates1 + xx_covariates2,
-                            enviro_df=cbind(xx_covariates1, xx_covariates2),
-                            replicates=id)
+                            replicates="id")
 
   expect_equal(output10["predictor", "Estimate"], expected=beta1, tolerance=0.05)
   expect_equal(output10["xx_covariates1", "Estimate"], expected=beta2, tolerance=0.05)
