@@ -2,15 +2,15 @@
 % Please edit documentation in R/fit_mgx_model.R
 \name{fit_mgx_model}
 \alias{fit_mgx_model}
-\title{Fit model for fixed gene k, taxon j, taxon j*}
+\title{Estimate the difference in expression-per-unit-abundance of a gene expressed by a responder taxon as a function of the abundance of a companion taxon}
 \usage{
 fit_mgx_model(
-  yy,
-  xstar,
-  xx,
+  enviro_df,
+  yy = "yy",
+  xstar = "xstar",
+  xx = "xx",
   replicates = NULL,
   formula = NULL,
-  enviro_df = NULL,
   wts = NULL,
   replace_zeros = "minimum",
   use_jack_se = FALSE,
@@ -18,36 +18,44 @@ fit_mgx_model(
 )
 }
 \arguments{
-\item{yy}{vector of abundances of gene k in taxon j}
+\item{enviro_df}{A data frame or tibble with columns containing the relevant variables, and rows denoting the observations. Columns must contain the following data: observed gene expression data, taxon abundance data, environmental covariates, and (optionally) technical replicate information.}
 
-\item{xstar}{vector of abundances of taxon j*}
+\item{yy}{The name of the column in \code{enviro_df} containing the expression data for a gene expressed by the responder taxon. Default is "yy". Expression data could be in the form of coverage, counts, etc. See vignettes for details on acceptable and suggested datatypes and preprocessing ("normalizations"). In the above notation, this corresponds to the expression of gene \eqn{k} expressed by taxon \eqn{j}.}
 
-\item{xx}{vector of abundances of taxon j}
+\item{xstar}{The name of the column in \code{enviro_df} containing abundances of the companion taxon. Default is "xstar". In the above notation, this corresponds to the abundance of  taxon \eqn{j^*}.}
 
-\item{replicates}{vector that contains the same entries for all observations that are technical replicates. Will be coerced to a factor down the line.}
+\item{xx}{The name of the column in \code{enviro_df} containing abundances of the responder taxon. Default is "xx". In the above notation, this corresponds to the abundance of taxon \eqn{j}.}
 
-\item{formula}{a formula describing the environmental covariates that should be included in the model. The variable names should be columns in enviro_df}
+\item{replicates}{The name of the column in \code{enviro_df} containing technical replicate information. Entries in this column should be the same within observations that are technical replicates. Will be coerced to a factor internally. Default is \code{NULL} (no samples have technical replicates; all samples are independent).}
 
-\item{enviro_df}{a data frame or tibble with columns containing environmental covariates that should be included in the model,}
+\item{formula}{A formula describing the environmental covariates that should be included in the model. The variable names should be columns in \code{enviro_df}}
 
-\item{wts}{vector of nonnegative weights. Could be sequencing depth to put more emphasis on deeply sequenced samples}
+\item{wts}{The name of the column in \code{enviro_df} containing nonnegative weights for the observation. Could be sequencing depth to put more emphasis on deeply sequenced samples. Default is \code{NULL} (all observations contribute equally to the likelihood).}
 
-\item{replace_zeros}{what to do with zeros in the denominator \eqn{X_{ij}}. Options include "minimum" or pseudocount numeric value (eg. 1)}
+\item{replace_zeros}{What to replace zeros with in the denominator \eqn{X_{ij}}. Options include "minimum" (replace with the smallest value) or pseudocount numeric value (eg. 1). Default is "minimum".}
 
-\item{use_jack_se}{when replicates are given, if TRUE will use jackknife standard errors instead of sandwich standard errors. This is recommended when
-there is a small number of clusters.}
+\item{use_jack_se}{Boolean indicating whether to use jackknife standard errors (TRUE) rather than sandwich standard errors (FALSE). Only relevant if technical replicates are included. Jackknife standard errors are recommended when
+there are a small number of observations. Defaults to FALSE.}
 
-\item{cluster_corr_coef}{when replicates are given, estimated value of the within-cluster correlation coefficient. This will only be used when gee estimation in \code{raoBust::gee_test} fails, and instead
-estimation is performed with a glm. This is set to NULL by default.}
+\item{cluster_corr_coef}{When technical replicates are given, the estimated value of the within-cluster correlation coefficient. This will only be used when GEE estimation in \code{raoBust::gee_test} fails, and
+estimation is performed with a glm. Defaults to NULL by default (no robust score test is returned).}
 }
 \description{
-We would like to estimate beta1 in the model
-\eqn{Y_ijk ~ Poisson(X_ij * c * (X_{ij*} / X_{ij})^{beta_1})}
+We would like to estimate the \eqn{\beta} parameters in the model
+\eqn{\text{average } Y_{ijk} = X_{ij} \times c \times (X_{ij^*} / X_{ij})^{\beta_1} \times e^{\beta_2 W_{i1} + \beta_3 W_{i2} + \ldots + \beta_p W_{i,p-1}}},
 where
-\eqn{Y_{ijk}} refers to data about the abundance of gene k expressed by taxon j in sample i
-\eqn{X_{ij}} refers to data about the abundance of taxon j in sample i
-\eqn{X_{ij*}} refers to data about the abundance of taxon j* in sample i
+\eqn{Y_{ijk}} refers to the observed abundance of gene \eqn{k} expressed by taxon \eqn{j} in sample \eqn{i},
+\eqn{X_{ij}} refers to the observed abundance of taxon \eqn{j} in sample \eqn{i},
+\eqn{X_{ij^*}} refers to the observed abundance of taxon \eqn{j^*} in sample \eqn{i}, and
+\eqn{W_{im}} is the value of abiotic covariate \eqn{m} observed in sample \eqn{i}.
+We can interpret \eqn{1.01^{\beta_1}} as the multiplicative change in the expression-per-unit-coverage of gene \eqn{k} in species \eqn{j} for 1\\\% increase in the coverage of species \eqn{j} compared to species \eqn{j^*}, when comparing samples with the same values of the abiotic covariates. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the true cell abundance scale (rather than just the coverage scale).
 }
-\details{
-We can then interpret, e.g., \eqn{1.01^{beta_1}} as the multiplicative change in the expression-per-unit-coverage of gene k in species j for 1\\% increase in the coverage of species j compared to species j*. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the abundance (rather than just coverage) scale
+\examples{
+my_df <- data.frame(xx = rpois(20, lambda = 400),
+                    xstar = rpois(20, lambda = 400),
+                    treatment = rep(0:1, each = 10),
+                    id = rep(1:4, 5))
+my_df$yy <- rpois(20, my_df$xx * 10 * (my_df$xstar / my_df$xx)^2)
+fit_mgx_model(enviro_df = my_df, replicates = "id", formula = ~ treatment)
+
 }

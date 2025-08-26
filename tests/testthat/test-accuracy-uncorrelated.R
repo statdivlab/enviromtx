@@ -8,10 +8,11 @@ test_that("reasonably accurate estimates", {
   beta0 <- 100
   beta1 <- 1
   yy1 <- rpois(n, xx1 * beta0 * (xstar1/xx1)^beta1)
+  df <- data.frame(yy = yy1,
+                   xstar = xstar1,
+                   xx = xx1)
 
-  output6 <- fit_mgx_model(yy = yy1,
-                           xstar = xstar1,
-                           xx = xx1,
+  output6 <- fit_mgx_model(df,
                            replace_zeros=1)
 
   expect_equal(unname(output6["Estimate"]), expected=beta1, tolerance=abs(0.05*beta1))
@@ -24,9 +25,9 @@ test_that("reasonably accurate estimates", {
   yy1 <- rpois(n, xx1 * beta0 * (xstar1/xx1)^beta1)
   yy1
 
-  output7 <- fit_mgx_model(yy = yy1,
+  output7 <- fit_mgx_model(data.frame(yy = yy1,
                            xstar = xstar1,
-                           xx = xx1,
+                           xx = xx1),
                            replace_zeros=1)
 
   expect_equal(unname(output7["Estimate"]), expected=beta1, tolerance=abs(0.05*beta1))
@@ -48,11 +49,12 @@ test_that("reasonably accurate estimates with covariates", {
   yy1 <- rpois(n, xx1 * beta0 * (xstar1/xx1)^beta1 * exp(beta2 * xx_covariates1 + beta3 * xx_covariates2))
 
   yy1
-  output8 <- fit_mgx_model(yy = yy1,
+  output8 <- fit_mgx_model(data.frame(yy = yy1,
                            xstar = xstar1,
                            xx = xx1,
+                           xx_covariates1,
+                           xx_covariates2),
                            formula= ~ xx_covariates1 + xx_covariates2,
-                           enviro_df=cbind(xx_covariates1, xx_covariates2),
                            replace_zeros=1)
 
   expect_equal(output8["predictor", "Estimate"], expected=beta1, tolerance=abs(0.05*beta1))
@@ -87,12 +89,11 @@ test_that("reasonably accurate estimates with covariates and correlation", {
 
   my_df <- tibble(yy1, xx1, predictor = log((xstar1 + 1)/(xx1 + 1)), xx_covariates1, xx_covariates2, id)
 
-  output9 <- fit_mgx_model(yy = yy1,
+  output9 <- fit_mgx_model(data.frame(yy = yy1,
                 xstar = xstar1,
-                xx = xx1,
+                xx = xx1, xx_covariates1, xx_covariates2, id),
                 formula= ~ xx_covariates1 + xx_covariates2,
-                enviro_df=cbind(xx_covariates1, xx_covariates2),
-                replicates=id,
+                replicates="id",
                 replace_zeros=1)
 
   expect_equal(output9["predictor", "Estimate"], expected=beta1, tolerance=abs(0.05*beta1))

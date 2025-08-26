@@ -16,9 +16,13 @@ test_that("environmental covariates work", {
   temp <- rnorm(nn, mean=23, sd = 2)
   salinity <- rnorm(nn, mean=35, sd = 5)
 
-  expect_silent(out_i_k <- fit_mgx_model(yy_i_k, xstar_i, xx_i,
-                                         formula = ~ temp + salinity,
-                                         enviro_df = cbind(temp, salinity)))
+  df <- data.frame(temp, salinity,
+              yy = yy_i_k,
+              xstar = xstar_i,
+              xx = xx_i)
+
+  expect_silent(out_i_k <- fit_mgx_model(df,
+                                         formula = ~ temp + salinity))
 
   expect_type(out_i_k[1,1], "double")
 
@@ -29,15 +33,32 @@ test_that("environmental covariates work", {
   expect_true(all(out_i_k[1:3, 1] == glm_coefs))
 
 
-  expect_warning(fit_mgx_model(yy_i_k, xstar_i, xx_i))
+  expect_warning(fit_mgx_model(df))
 
 
   ### test with replicates
-  expect_silent(out_i_k_rep <- fit_mgx_model(yy_i_k, xstar_i, xx_i,
+  df$replicates <- rep(LETTERS[1:10], each = 3)
+  expect_silent(out_i_k_rep <- fit_mgx_model(df,
                                              formula = ~ temp + salinity,
-                                             replicates=rep(LETTERS[1:10], each = 3),
-                                             enviro_df = cbind(temp, salinity)))
+                                             replicates="replicates"))
   expect_type(out_i_k_rep[1,1], "double")
 
+
+  # test with infinite covariate value
+  new_df <- df
+  new_df$temp[3] <- Inf
+  expect_error(fit_mgx_model(new_df, formula = ~ temp + salinity),
+               "At least one value of covariate temp is infinite. Please fix this and rerun.")
+
+  # test with infinite replicate value
+  new_df$id <- rep(1:5, 6)
+  new_df$id[5] <- -Inf
+  expect_error(fit_mgx_model(new_df, formula = ~ temp + salinity, replicates = "id"),
+               "At least one replicate provided is infinite. Please fix this and then rerun.")
+
+  new_df <- df
+  new_df$id <- rnorm(30)
+  expect_error(fit_mgx_model(new_df, formula = ~ temp + salinity + id),
+               "You have a covariate called 'id' in your formula. This is a protected term in `fit_mgx_model`, please use a different name for this covariate")
 
 })
