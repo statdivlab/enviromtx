@@ -1,26 +1,26 @@
-#' Fit model for fixed gene k, taxon j, taxon j*
+#' Estimate the difference in expression-per-unit-abundance of a gene expressed by a responder taxon as a function of the abundance of a companion taxon
 #'
-#' We would like to estimate beta1 in the model
-#' \eqn{Y_ijk ~ Poisson(X_ij * c * (X_{ij*} / X_{ij})^{beta_1})}
+#' We would like to estimate the \eqn{\beta} parameters in the model
+#' \eqn{\text{average } Y_{ijk} = X_{ij} \times c \times (X_{ij^*} / X_{ij})^{\beta_1} \times e^{\beta_2 W_{i1} + \beta_3 W_{i2} + \ldots + \beta_p W_{i,p-1}}},
 #' where
-#' \eqn{Y_{ijk}} refers to data about the abundance of gene k expressed by taxon j in sample i
-#' \eqn{X_{ij}} refers to data about the abundance of taxon j in sample i
-#' \eqn{X_{ij*}} refers to data about the abundance of taxon j* in sample i
+#' \eqn{Y_{ijk}} refers to the observed abundance of gene \eqn{k} expressed by taxon \eqn{j} in sample \eqn{i},
+#' \eqn{X_{ij}} refers to the observed abundance of taxon \eqn{j} in sample \eqn{i},
+#' \eqn{X_{ij^*}} refers to the observed abundance of taxon \eqn{j^*} in sample \eqn{i}, and
+#' \eqn{W_{im}} is the value of abiotic covariate \eqn{m} observed in sample \eqn{i}.
+#' We can interpret \eqn{1.01^{\beta_1}} as the multiplicative change in the expression-per-unit-coverage of gene \eqn{k} in species \eqn{j} for 1\\% increase in the coverage of species \eqn{j} compared to species \eqn{j^*}, when comparing samples with the same values of the abiotic covariates. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the true cell abundance scale (rather than just the coverage scale).
 #'
-#' We can then interpret, e.g., \eqn{1.01^{beta_1}} as the multiplicative change in the expression-per-unit-coverage of gene k in species j for 1\% increase in the coverage of species j compared to species j*. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the abundance (rather than just coverage) scale
-#'
-#' @param enviro_df a data frame or tibble with columns containing relevant abundances, environmental covariates that should be included in the model, and optionally replicate information
-#' @param yy column of `enviro_df` containing abundances of gene k in taxon j. Default is "yy".
-#' @param xstar column of `enviro_df` containing abundances of taxon j*. Default is "xstar".
-#' @param xx column of `enviro_df` containing abundances of taxon j. Default is "xx".
-#' @param replicates column of `enviro_df` containing the same entries for all observations that are technical replicates. Will be coerced to a factor down the line. Default is `NULL`.
-#' @param formula a formula describing the environmental covariates that should be included in the model. The variable names should be columns in `enviro_df`
-#' @param wts column of `enviro_df` containing nonnegative weights. Could be sequencing depth to put more emphasis on deeply sequenced samples. Default is `NULL`.
-#' @param replace_zeros what to do with zeros in the denominator \eqn{X_{ij}}. Options include "minimum" or pseudocount numeric value (eg. 1)
-#' @param use_jack_se when replicates are given, if TRUE will use jackknife standard errors instead of sandwich standard errors. This is recommended when
-#' there is a small number of clusters.
-#' @param cluster_corr_coef when replicates are given, estimated value of the within-cluster correlation coefficient. This will only be used when gee estimation in `raoBust::gee_test` fails, and instead
-#' estimation is performed with a glm. This is set to NULL by default.
+#' @param enviro_df A data frame or tibble with columns containing the relevant variables, and rows denoting the observations. Columns must contain the following data: observed gene expression data, taxon abundance data, environmental covariates, and (optionally) technical replicate information.
+#' @param yy The name of the column in `enviro_df` containing the expression data for a gene expressed by the responder taxon. Default is "yy". Expression data could be in the form of coverage, counts, etc. See vignettes for details on acceptable and suggested datatypes and preprocessing ("normalizations"). In the above notation, this corresponds to the expression of gene \eqn{k} expressed by taxon \eqn{j}.
+#' @param xx The name of the column in `enviro_df` containing abundances of the responder taxon. Default is "xx". In the above notation, this corresponds to the abundance of taxon \eqn{j}.
+#' @param xstar The name of the column in `enviro_df` containing abundances of the companion taxon. Default is "xstar". In the above notation, this corresponds to the abundance of  taxon \eqn{j^*}.
+#' @param replicates The name of the column in `enviro_df` containing technical replicate information. Entries in this column should be the same within observations that are technical replicates. Will be coerced to a factor internally. Default is `NULL` (no samples have technical replicates; all samples are independent).
+#' @param formula A formula describing the environmental covariates that should be included in the model. The variable names should be columns in `enviro_df`
+#' @param wts The name of the column in `enviro_df` containing nonnegative weights for the observation. Could be sequencing depth to put more emphasis on deeply sequenced samples. Default is `NULL` (all observations contribute equally to the likelihood).
+#' @param replace_zeros What to replace zeros with in the denominator \eqn{X_{ij}}. Options include "minimum" (replace with the smallest value) or pseudocount numeric value (eg. 1). Default is "minimum".
+#' @param use_jack_se Boolean indicating whether to use jackknife standard errors (TRUE) rather than sandwich standard errors (FALSE). Only relevant if technical replicates are included. Jackknife standard errors are recommended when
+#' there are a small number of observations. Defaults to FALSE.
+#' @param cluster_corr_coef When technical replicates are given, the estimated value of the within-cluster correlation coefficient. This will only be used when GEE estimation in `raoBust::gee_test` fails, and
+#' estimation is performed with a glm. Defaults to NULL by default (no robust score test is returned).
 #'
 #' @importFrom tibble tibble
 #' @importFrom dplyr bind_cols
@@ -99,6 +99,16 @@ fit_mgx_model <- function(
 
   if (any(enviro_df[[xstar]] == 0)) stop("There are zeros in xstar and you haven't told me what to do with them!")
 
+  if (any(enviro_df[[xstar]] < 0)) stop("You gave negative abundance data for `xstar`. This doesn't make sense.")
+  if (any(enviro_df[[xx]] < 0)) stop("You gave negative abundance data for `xx`. This doesn't make sense.")
+  if (any(enviro_df[[yy]] < 0)) stop("You gave negative expression data `yy`. This doesn't make sense.")
+
+
+  if (any(is.infinite(enviro_df[[xstar]]))) stop("You gave infinite abundance data for `xstar`. This doesn't make sense.")
+  if (any(is.infinite(enviro_df[[xx]]))) stop("You gave infinite abundance data for `xx`. This doesn't make sense.")
+  if (any(is.infinite(enviro_df[[yy]]))) stop("You gave infinite abundance data for `yy`. This doesn't make sense.")
+
+
   ################################################
   ## set up the data for fitting
   ################################################
@@ -121,9 +131,28 @@ fit_mgx_model <- function(
 
   }
 
-  if(any(apply(my_df, 2, is.infinite))) {
-    print(my_df, n = nrow(my_df))
-    stop("Infinities in my_df? Amy's fault.")
+  # check for "id" in formula
+  form_terms <- trimws(unlist(strsplit(x = as.character(formula)[3], split = "\\+")))
+  if ("id" %in% form_terms) {
+    stop("You have a covariate called 'id' in your formula. This is a protected term in `fit_mgx_model`, please use a different name for this covariate")
+  }
+
+  # check for infinite values in my_df
+  if (!is.null(wts)) {
+    if (any(is.infinite(my_df[[wts]]))) {
+      stop("At least one weight provided is infinite. Please fix this and then rerun.")
+    }
+  }
+  if (!is.null(replicates)) {
+    if (any(is.infinite(my_df[[replicates]]))) {
+      stop("At least one replicate provided is infinite. Please fix this and then rerun.")
+    }
+  }
+  covs <- all.vars(update(formula, . ~ .))[-1]
+  for (i in 1:length(covs)) {
+    if (any(is.infinite(my_df[[covs[i]]]))) {
+      stop(paste0("At least one value of covariate ", covs[i], " is infinite. Please fix this and rerun."))
+    }
   }
 
   if (is.null(wts)) {
