@@ -131,6 +131,12 @@ fit_mgx_model <- function(
 
   }
 
+  # check for "id" in formula
+  form_terms <- trimws(unlist(strsplit(x = as.character(formula)[3], split = "\\+")))
+  if ("id" %in% form_terms) {
+    stop("You have a covariate called 'id' in your formula. This is a protected term in `fit_mgx_model`, please use a different name for this covariate")
+  }
+
   # check for infinite values in my_df
   if (!is.null(wts)) {
     if (any(is.infinite(my_df[[wts]]))) {

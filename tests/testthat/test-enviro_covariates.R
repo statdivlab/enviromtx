@@ -56,4 +56,9 @@ test_that("environmental covariates work", {
   expect_error(fit_mgx_model(new_df, formula = ~ temp + salinity, replicates = "id"),
                "At least one replicate provided is infinite. Please fix this and then rerun.")
 
+  new_df <- df
+  new_df$id <- rnorm(30)
+  expect_error(fit_mgx_model(new_df, formula = ~ temp + salinity + id),
+               "You have a covariate called 'id' in your formula. This is a protected term in `fit_mgx_model`, please use a different name for this covariate")
+
 })
