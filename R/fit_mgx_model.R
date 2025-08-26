@@ -140,13 +140,27 @@ fit_mgx_model <- function(
     wts <- "wts"
   }
 
-  my_df$offset <- log(my_df[[xx]])
-  offset <- "offset"
-
   # center covariates if desired
   if (control$center) {
+    # get variable names from the formula
+    vars <- all.vars(update(formula, . ~ .))[-1]  # drop response
 
+    # copy data so we don't overwrite
+    data_centered <- my_df
+
+    # center each variable in the formula
+    for (v in vars) {
+      is_binary <- length(unique(my_df[[v]])) < 3
+      if (is.numeric(my_df[[v]]) & !is_binary) {
+        data_centered[[v]] <- scale(my_df[[v]], center = TRUE, scale = FALSE)
+      }
+    }
+
+    my_df <- data_centered
   }
+
+  my_df$offset <- log(my_df[[xx]])
+  offset <- "offset"
 
   ################################################
   ## fit the model with Poisson regression
