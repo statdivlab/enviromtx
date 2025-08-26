@@ -5,12 +5,12 @@
 \title{Fit model for fixed gene k, taxon j, taxon j*}
 \usage{
 fit_mgx_model(
-  yy,
-  xstar,
-  xx,
+  enviro_df,
+  yy = "yy",
+  xstar = "xstar",
+  xx = "xx",
   replicates = NULL,
   formula = NULL,
-  enviro_df = NULL,
   wts = NULL,
   replace_zeros = "minimum",
   use_jack_se = FALSE,
@@ -18,19 +18,19 @@ fit_mgx_model(
 )
 }
 \arguments{
-\item{yy}{vector of abundances of gene k in taxon j}
+\item{enviro_df}{a data frame or tibble with columns containing relevant abundances, environmental covariates that should be included in the model, and optionally replicate information}
 
-\item{xstar}{vector of abundances of taxon j*}
+\item{yy}{column of \code{enviro_df} containing abundances of gene k in taxon j. Default is "yy".}
 
-\item{xx}{vector of abundances of taxon j}
+\item{xstar}{column of \code{enviro_df} containing abundances of taxon j*. Default is "xstar".}
 
-\item{replicates}{vector that contains the same entries for all observations that are technical replicates. Will be coerced to a factor down the line.}
+\item{xx}{column of \code{enviro_df} containing abundances of taxon j. Default is "xx".}
 
-\item{formula}{a formula describing the environmental covariates that should be included in the model. The variable names should be columns in enviro_df}
+\item{replicates}{column of \code{enviro_df} containing the same entries for all observations that are technical replicates. Will be coerced to a factor down the line. Default is \code{NULL}.}
 
-\item{enviro_df}{a data frame or tibble with columns containing environmental covariates that should be included in the model,}
+\item{formula}{a formula describing the environmental covariates that should be included in the model. The variable names should be columns in \code{enviro_df}}
 
-\item{wts}{vector of nonnegative weights. Could be sequencing depth to put more emphasis on deeply sequenced samples}
+\item{wts}{column of \code{enviro_df} containing nonnegative weights. Could be sequencing depth to put more emphasis on deeply sequenced samples. Default is \code{NULL}.}
 
 \item{replace_zeros}{what to do with zeros in the denominator \eqn{X_{ij}}. Options include "minimum" or pseudocount numeric value (eg. 1)}
 
@@ -50,4 +50,13 @@ where
 }
 \details{
 We can then interpret, e.g., \eqn{1.01^{beta_1}} as the multiplicative change in the expression-per-unit-coverage of gene k in species j for 1\\% increase in the coverage of species j compared to species j*. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the abundance (rather than just coverage) scale
+}
+\examples{
+my_df <- data.frame(xx = rpois(20, lambda = 400),
+                    xstar = rpois(20, lambda = 400),
+                    treatment = rep(0:1, each = 10),
+                    id = rep(1:4, 5))
+my_df$yy <- rpois(20, my_df$xx * 10 * (my_df$xstar / my_df$xx)^2)
+fit_mgx_model(enviro_df = my_df, replicates = "id", formula = ~ treatment)
+
 }

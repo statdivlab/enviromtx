@@ -39,14 +39,15 @@ This is a basic example which shows you how to fit the model. More documentation
 library(enviromtx)
 n <- 10
 set.seed(3)
-xx1 <- rpois(n, lambda=400)
-xstar1 <- rpois(n, lambda=400)
+df <- data.frame(xx1 = rpois(n, lambda=400),
+                 xstar1 = rpois(n, lambda=400))
 beta0 <- 100
 beta1 <- 20
-yy1 <- rpois(n, xx1 * beta0 * (xstar1/xx1)^beta1)
+df$yy1 <- rpois(n, xx1 * beta0 * (xstar1/xx1)^beta1)
 
-fit_mgx_model(yy = yy1,
-              xstar = xstar1,
-              xx = xx1,
+fit_mgx_model(enviro_df = df, 
+              yy = "yy1",
+              xstar = "xstar1",
+              xx = "xx1",
               replace_zeros=1)
 ``` 
