@@ -26,11 +26,11 @@ test_that("when a value of yy, xx, xstar, or a relevant covariate is missing, th
   my_df_yy <- my_df
   my_df_yy$yy[2] <- NA
 
-  glm_res <- fit_mgx_model(my_df_yy)
+  expect_message(glm_res <- fit_mgx_model(my_df_yy))
   glm_res_no2 <- fit_mgx_model(my_df_yy[-2, ])
   expect_true(all.equal(glm_res, glm_res_no2))
 
-  gee_res <- fit_mgx_model(my_df_yy, replicates = "id")
+  expect_message(gee_res <- fit_mgx_model(my_df_yy, replicates = "id"))
   gee_res_no2 <- fit_mgx_model(my_df_yy[-2, ], replicates = "id")
   expect_true(all.equal(gee_res, gee_res_no2))
 
@@ -38,11 +38,11 @@ test_that("when a value of yy, xx, xstar, or a relevant covariate is missing, th
   my_df_xx <- my_df
   my_df_xx$xx[2] <- NA
 
-  glm_res <- fit_mgx_model(my_df_xx)
+  expect_message(glm_res <- fit_mgx_model(my_df_xx))
   glm_res_no2 <- fit_mgx_model(my_df_xx[-2, ])
   expect_true(all.equal(glm_res, glm_res_no2))
 
-  gee_res <- fit_mgx_model(my_df_xx, replicates = "id")
+  expect_message(gee_res <- fit_mgx_model(my_df_xx, replicates = "id"))
   gee_res_no2 <- fit_mgx_model(my_df_xx[-2, ], replicates = "id")
   expect_true(all.equal(gee_res, gee_res_no2))
 
@@ -50,11 +50,11 @@ test_that("when a value of yy, xx, xstar, or a relevant covariate is missing, th
   my_df_xstar <- my_df
   my_df_xstar$xstar[2] <- NA
 
-  glm_res <- fit_mgx_model(my_df_xstar)
+  expect_message(glm_res <- fit_mgx_model(my_df_xstar))
   glm_res_no2 <- fit_mgx_model(my_df_xstar[-2, ])
   expect_true(all.equal(glm_res, glm_res_no2))
 
-  gee_res <- fit_mgx_model(my_df_xstar, replicates = "id")
+  expect_message(gee_res <- fit_mgx_model(my_df_xstar, replicates = "id"))
   gee_res_no2 <- fit_mgx_model(my_df_xstar[-2, ], replicates = "id")
   expect_true(all.equal(gee_res, gee_res_no2))
 
@@ -63,11 +63,11 @@ test_that("when a value of yy, xx, xstar, or a relevant covariate is missing, th
   my_df_cov$cov <- rnorm(nrow(my_df))
   my_df_cov$cov[2] <- NA
 
-  glm_res <- fit_mgx_model(my_df_cov, formula = ~ cov)
+  expect_message(glm_res <- fit_mgx_model(my_df_cov, formula = ~ cov))
   glm_res_no2 <- fit_mgx_model(my_df_cov[-2, ], formula = ~ cov)
   expect_true(all.equal(glm_res, glm_res_no2))
 
-  gee_res <- fit_mgx_model(my_df_cov, replicates = "id", formula = ~ cov)
+  expect_message(gee_res <- fit_mgx_model(my_df_cov, replicates = "id", formula = ~ cov))
   gee_res_no2 <- fit_mgx_model(my_df_cov[-2, ], replicates = "id", formula = ~ cov)
   expect_true(all.equal(gee_res, gee_res_no2))
 

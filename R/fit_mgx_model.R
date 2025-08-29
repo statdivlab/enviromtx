@@ -172,7 +172,11 @@ fit_mgx_model <- function(
   # remove cases with missing values
   dat_clean <- my_df[, all.vars(formula)]
   keep_rows <- stats::complete.cases(dat_clean)
+  n_incomplete <- nrow(my_df) - sum(keep_rows)
   my_df <- my_df[keep_rows, ]
+  if (n_incomplete > 0) {
+    message(paste0(n_incomplete, " of your observations contain missing values for either `yy`, `xx`, `xstar`, or covariates within `formula`. These observations will be dropped from the analysis."))
+  }
 
   ################################################
   ## fit the model with Poisson regression
