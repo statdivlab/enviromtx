@@ -21,6 +21,10 @@
 #' there are a small number of observations. Defaults to FALSE.
 #' @param cluster_corr_coef When technical replicates are given, the estimated value of the within-cluster correlation coefficient. This will only be used when GEE estimation in `raoBust::gee_test` fails, and
 #' estimation is performed with a glm. Defaults to NULL by default (no robust score test is returned).
+#' @param control a list of control parameters.
+#'    Defaults are \code{list(center = FALSE)}.
+#'    Users can override some or all of these.
+#'    If \code{center = TRUE}, then covariates will be centered before being included in the model.
 #'
 #' @importFrom tibble tibble
 #' @importFrom dplyr bind_cols
@@ -49,8 +53,13 @@ fit_mgx_model <- function(
     wts = NULL,
     replace_zeros = "minimum",
     use_jack_se = FALSE,
-    cluster_corr_coef = NULL
+    cluster_corr_coef = NULL,
+    control = list()
 ) {
+
+  # merge user-supplied control arguments with default
+  defaults <- list(center = FALSE)
+  control <- utils::modifyList(defaults, control)
 
   # first, check that everything is in enviro_df
   if (!(is.character(yy) &
@@ -158,6 +167,25 @@ fit_mgx_model <- function(
   if (is.null(wts)) {
     my_df$wts <- rep(1L, nrow(my_df))
     wts <- "wts"
+  }
+
+  # center covariates if desired
+  if (control$center) {
+    # get variable names from the formula
+    vars <- setdiff(all.vars(update(formula, . ~ .))[-1], "predictor")
+
+    # copy data so we don't overwrite
+    data_centered <- my_df
+
+    # center each variable in the formula
+    for (v in vars) {
+      is_binary <- length(unique(my_df[[v]])) < 3
+      if (is.numeric(my_df[[v]]) & !is_binary) {
+        data_centered[[v]] <- my_df[[v]] - mean(my_df[[v]], na.rm = TRUE)
+      }
+    }
+
+    my_df <- data_centered
   }
 
   my_df$offset <- log(my_df[[xx]])
