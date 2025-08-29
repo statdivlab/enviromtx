@@ -22,7 +22,7 @@
 #' @param cluster_corr_coef When technical replicates are given, the estimated value of the within-cluster correlation coefficient. This will only be used when GEE estimation in `raoBust::gee_test` fails, and
 #' estimation is performed with a glm. Defaults to NULL by default (no robust score test is returned).
 #' @param control a list of control parameters.
-#'    Defaults are \code{list(center = FALSE)}}.
+#'    Defaults are \code{list(center = FALSE)}.
 #'    Users can override some or all of these.
 #'    If \code{center = TRUE}, then covariates will be centered before being included in the model.
 #'
@@ -59,7 +59,7 @@ fit_mgx_model <- function(
 
   # merge user-supplied control arguments with default
   defaults <- list(center = FALSE)
-  control <- modifyList(defaults, control)
+  control <- utils::modifyList(defaults, control)
 
   # first, check that everything is in enviro_df
   if (!(is.character(yy) &

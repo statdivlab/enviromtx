@@ -14,7 +14,8 @@ fit_mgx_model(
   wts = NULL,
   replace_zeros = "minimum",
   use_jack_se = FALSE,
-  cluster_corr_coef = NULL
+  cluster_corr_coef = NULL,
+  control = list()
 )
 }
 \arguments{
@@ -39,6 +40,11 @@ there are a small number of observations. Defaults to FALSE.}
 
 \item{cluster_corr_coef}{When technical replicates are given, the estimated value of the within-cluster correlation coefficient. This will only be used when GEE estimation in \code{raoBust::gee_test} fails, and
 estimation is performed with a glm. Defaults to NULL by default (no robust score test is returned).}
+
+\item{control}{a list of control parameters.
+Defaults are \code{list(center = FALSE)}.
+Users can override some or all of these.
+If \code{center = TRUE}, then covariates will be centered before being included in the model.}
 }
 \description{
 We would like to estimate the \eqn{\beta} parameters in the model
