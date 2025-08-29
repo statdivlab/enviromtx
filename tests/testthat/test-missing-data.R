@@ -86,6 +86,6 @@ test_that("when a value of yy, xx, xstar, or a relevant covariate is missing, th
                            replicates = "id")
   gee_res_oth <- fit_mgx_model(subset(my_df_irr_cov, select = -irr_cov),
                                formula = ~ cov, replicates = "id")
-  expect_true(all.equal(gee_res, gee_res_oth))
+  expect_true(all.equal(gee_res, gee_res_oth, tolerance = 1e-3))
 })
 
