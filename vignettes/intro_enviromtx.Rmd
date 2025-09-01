@@ -1,0 +1,113 @@
+---
+title: "Introduction to enviromtx"
+output: rmarkdown::html_vignette
+author: "Sarah Teichman and Amy Willis"
+date: "`r Sys.Date()`"
+vignette: >
+  %\VignetteIndexEntry{Introduction to enviromtx}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+First we will install `enviromtx` if haven't already.
+
+```{r, eval = FALSE}
+# if (!require("remotes", quietly = TRUE))
+#     install.packages("remotes")
+# 
+# remotes::install_github("statdivlab/enviromtx")
+```
+
+Next we will load `enviromtx`, as well as relevant packages in the `tidyverse` suite. 
+
+```{r setup}
+library(enviromtx)
+```
+
+## Introduction 
+
+This vignette serves as an introduction to `enviromtx`, a statistical method to model microbial interactions and their transcriptional signatures from metatranscriptome data. We will demonstrate this method on data from Bartolek et al., collected from the North Pacific Ocean. 
+
+The main function in `enviromtx` is `fit_mgx_model()`. This function considers a pair of taxa, one designated the "responder" taxon and the other the "companion" taxon, and tests whether the responder taxon shows a difference in gene expression associated with the abundance of the companion taxon. To use this function, you will need a data frame with the following variables:
+
+- `yy`: expression data for a gene expressed by the responder taxon.
+- `xx`: observed abundance of the responder taxon.
+- `xstar`: observed abundance of the companion taxon. 
+
+Optionally, the data frame can also include the following variables:
+
+- `replicates`: technical replicate information for samples, if applicable.
+- `wts`: optional non-negative weights for samples. These could be sequencing depths, to put more emphasis on deeply sequenced samples.
+- enviromental covariates: any relevant environmental covariates for the samples.
+
+```{r}
+data("example_data", package = "enviromtx")
+head(example_data)
+```
+
+This `example_data` involves *Pseudoalteromonas sp.* as the responder taxon and *Chaetoceors dichaeta* as the companion taxon. We can see that this `example_data` contains each of these required variables including expression data for four KOfams (representing genes), as well as `sample_name_r` which gives replicate information and the environmental covariate `temp`.
+
+## Estimation and testing
+
+Now that we've looked at the data, lets fit a model with `fit_mgx_model()` for KOfam K02520. 
+
+```{r}
+model_K02520 <- fit_mgx_model(enviro_df = example_data,
+                              yy = "K02520_counts_sum",
+                              formula = ~ temp, 
+                              replicates = "sample_name")
+model_K02520
+```
+
+Here we can see the output of `fit_mgx_model()`. We have a row for `predictor` and a row for `temp`, as well as a row for `correlation:alpha` which we will not focus on in this vignette. We have columns for `Estimate`, `Robust Std Error`, upper and lower boundaries of a 95\% confidence interval, a robust Wald p-value, and a robust score p-value. 
+
+You may notice that while `temp` was included as a covariate in the model, `predictor` was not. `predictor` is included in all `enviromtx` models. It is a transformation of `xx` and `xstar`, specifically `predictor` = log(`xx` / `xstar`). This is the log ratio of abundance of the responder taxon to the companion taxon. 
+
+Let's interpret our estimates. For `predictor` we have an estimate of $-0.18$. This means that the average expression of function K02520 per unit abundance of the responder taxon has a fold-difference of $\exp(-0.18)$ = $0.84$ associated with a one unit increase in the relative abundance of the companion taxon to the responder taxon, holding temperature constant.
+
+For `temp` we have an estimate of $-0.27$. This means that the average expression of function K02520 per unit abundance of the responder taxon has a fold-difference of $\exp(-0.27) = 0.76$ associated with a one degree increase in temperature, holding the relative abundance of companion taxon to responder taxon constant. 
+
+Next, let's consider the p-values. By default `fit_mgx_model()` runs both a robust Wald test and a robust score test. Both test the same hypothesis: that the average expression of the gene per unit abundance of the responder taxon does not change with a one unit increase in the relative abundance of the companion taxon to the responder taxon (for the test of the `predictor` covariate). We recommend doing inference using the robust score tests, due to their better error rate control with small sample sizes and sparse gene expression data. 
+
+Let's now fit models for the other three KOfams. 
+
+```{r}
+model_K01006 <- fit_mgx_model(enviro_df = example_data,
+                              yy = "K01006_counts_sum",
+                              formula = ~ temp, 
+                              replicates = "sample_name")
+model_K01006
+model_K01497 <- fit_mgx_model(enviro_df = example_data,
+                              yy = "K01497_counts_sum",
+                              formula = ~ temp, 
+                              replicates = "sample_name")
+model_K01497
+model_K03106 <- fit_mgx_model(enviro_df = example_data,
+                              yy = "K03106_counts_sum",
+                              formula = ~ temp, 
+                              replicates = "sample_name")
+model_K03106
+```
+
+We can see that K01006 has similar estimates for `predictor` and `temp` as K02520, while KOfams K01497 and K03106 have estimates with smaller magnitudes. Although robust score test p-values are smaller for KOfams K01006 and K02520, none are significant at an alpha threshold of $0.05$ (even before accounting for multiple testing). 
+
+Now you know how to use the `enviromtx` package for your metatranscriptome analyses! If you have additional questions, feel free to post an [issue](https://github.com/statdivlab/enviromtx/issues). If you want to know more of the details of how `enviromtx` fits these models, continue to the technical appendix below.
+
+## Technical Appendix 
+
+The package `enviromtx` calls the package `raoBust`, which fits gee or glm models (for data with and without replicates) and runs robust score tests. When there are not replicates, `raoBust` calls the `glm()` function from the `stats` package. However, when there are replicates, `raoBust` calls `geelm()` from the `geeasy` package, and if this fails then it calls `glm()`. 
+
+When `geelm()` fails and `glm()` is called, robust score tests cannot be fit by default. When `geelm()` fails, the output for `fit_mgx_model()` will contain `NA` values for the entire `Robust Score p` column of the output. However, the robust score tests can be fit if the user inputs the argument `cluster_corr_coef` to `fit_mgx_model()`. Our suggested workflow is running `fit_mgx_model()` for all taxon pairs of interest, and then for pairs for which `geelm()` successfully runs, finding the average `correlation:alpha` value. Then, `fit_mgx_model()` can be rerun for pairs for which `geelm()` failed, inputting the average `correlation:alpha` value as `cluster_corr_coef`. 
+
+## Citation 
+
+If you use `enviromtx`, please cite the preprint:
+
+Bartolek et al. "Functional patterns of microbial interaction in the North Pacific revelaed through statistical modeling of environmental metatranscriptomes." (2025+)
