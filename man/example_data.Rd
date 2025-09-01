@@ -19,7 +19,7 @@ A data frame with 22 rows and 9 variables:
 }
 }
 \source{
-Bartolek et al. "Functional patterns of microbial interaction in the North Pacific revelaed through statistical modeling of environmental metatranscriptomes." (2025+)
+Bartolek et al. "Functional patterns of microbial interaction in the North Pacific revealed through statistical modeling of environmental metatranscriptomes." (2025+)
 }
 \usage{
 example_data

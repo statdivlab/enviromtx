@@ -14,5 +14,5 @@
 #'   \item{K01497_counts_sum}{Observed abundance of gene K01497 expressed by the responder taxon (integer)}
 #'   \item{K03106_counts_sum}{Observed abundance of gene K03106 expressed by the responder taxon (integer)}
 #' }
-#' @source Bartolek et al. "Functional patterns of microbial interaction in the North Pacific revelaed through statistical modeling of environmental metatranscriptomes." (2025+)
+#' @source Bartolek et al. "Functional patterns of microbial interaction in the North Pacific revealed through statistical modeling of environmental metatranscriptomes." (2025+)
 "example_data"
