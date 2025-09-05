@@ -9,7 +9,7 @@
 #' \eqn{W_{im}} is the value of abiotic covariate \eqn{m} observed in sample \eqn{i}.
 #' We can interpret \eqn{1.01^{\beta_1}} as the multiplicative change in the expression-per-unit-coverage of gene \eqn{k} in species \eqn{j} for 1\\% increase in the coverage of species \eqn{j} compared to species \eqn{j^*}, when comparing samples with the same values of the abiotic covariates. With some slightly stronger assumptions about the sampling mechanism, we can also interpret this on the true cell abundance scale (rather than just the coverage scale).
 #'
-#' @param enviro_df A data frame or tibble with columns containing the relevant variables, and rows denoting the observations. Columns must contain the following data: observed gene expression data, taxon abundance data, environmental covariates, and (optionally) technical replicate information.
+#' @param enviro_df A data frame or tibble with columns containing the relevant variables, and rows denoting the observations. Columns must contain the following data: observed gene expression data, taxon abundance data, environmental covariates, and (optionally) technical replicate information. If any of these values are missing, the entire row containing the missing value will be removed from the data.
 #' @param yy The name of the column in `enviro_df` containing the expression data for a gene expressed by the responder taxon. Default is "yy". Expression data could be in the form of coverage, counts, etc. See vignettes for details on acceptable and suggested datatypes and preprocessing ("normalizations"). In the above notation, this corresponds to the expression of gene \eqn{k} expressed by taxon \eqn{j}.
 #' @param xx The name of the column in `enviro_df` containing abundances of the responder taxon. Default is "xx". In the above notation, this corresponds to the abundance of taxon \eqn{j}.
 #' @param xstar The name of the column in `enviro_df` containing abundances of the companion taxon. Default is "xstar". In the above notation, this corresponds to the abundance of  taxon \eqn{j^*}.
@@ -79,6 +79,9 @@ fit_mgx_model <- function(
         stop("`replicates` argument must be a column name in `enviro_df` if it is included.")
       }
     }
+    if (any(is.na(enviro_df[[replicates]]))) {
+      stop("At least one of your replicates provided is NA. Please provide a value for this replicate, do not use replicates, or remove observations with missing replicates.")
+    }
   }
   if (!is.null(wts)) {
     if (!is.character(wts)) {
@@ -87,6 +90,9 @@ fit_mgx_model <- function(
       if (!(wts %in% names(enviro_df))) {
         stop("`wts` argument must be a column name in `enviro_df` if it is included.")
       }
+    }
+    if (any(is.na(enviro_df[[wts]]))) {
+      stop("At least one of your weights provided is NA. Please provide a value for this weight, do not use weights, or remove observations with missing weights.")
     }
   }
 
@@ -97,7 +103,7 @@ fit_mgx_model <- function(
     if (replace_zeros == 0) stop("You've told me to replace zeroes with zero!")
     enviro_df[[xx]][enviro_df[[xx]] == 0] <- replace_zeros
   }
-  if (any(enviro_df[[xx]] == 0)) stop("There are zeros in enviro_df$xx and you haven't told me what to do with them!")
+  if (any(enviro_df[[xx]] == 0, na.rm = TRUE)) stop("There are zeros in enviro_df$xx and you haven't told me what to do with them!")
 
   if (replace_zeros == "minimum") {
     enviro_df[[xstar]][enviro_df[[xstar]] == 0] <- min(enviro_df[[xstar]][enviro_df[[xstar]] > 0]) # cheap pseudocount - take minimum
@@ -106,11 +112,11 @@ fit_mgx_model <- function(
     enviro_df[[xstar]][enviro_df[[xstar]] == 0] <- replace_zeros
   }
 
-  if (any(enviro_df[[xstar]] == 0)) stop("There are zeros in xstar and you haven't told me what to do with them!")
+  if (any(enviro_df[[xstar]] == 0, na.rm = TRUE)) stop("There are zeros in xstar and you haven't told me what to do with them!")
 
-  if (any(enviro_df[[xstar]] < 0)) stop("You gave negative abundance data for `xstar`. This doesn't make sense.")
-  if (any(enviro_df[[xx]] < 0)) stop("You gave negative abundance data for `xx`. This doesn't make sense.")
-  if (any(enviro_df[[yy]] < 0)) stop("You gave negative expression data `yy`. This doesn't make sense.")
+  if (any(enviro_df[[xstar]] < 0, na.rm = TRUE)) stop("You gave negative abundance data for `xstar`. This doesn't make sense.")
+  if (any(enviro_df[[xx]] < 0, na.rm = TRUE)) stop("You gave negative abundance data for `xx`. This doesn't make sense.")
+  if (any(enviro_df[[yy]] < 0, na.rm = TRUE)) stop("You gave negative expression data `yy`. This doesn't make sense.")
 
 
   if (any(is.infinite(enviro_df[[xstar]]))) stop("You gave infinite abundance data for `xstar`. This doesn't make sense.")
@@ -190,6 +196,15 @@ fit_mgx_model <- function(
 
   my_df$offset <- log(my_df[[xx]])
   offset <- "offset"
+
+  # remove cases with missing values
+  dat_clean <- my_df[, all.vars(formula)]
+  keep_rows <- stats::complete.cases(dat_clean)
+  n_incomplete <- nrow(my_df) - sum(keep_rows)
+  my_df <- my_df[keep_rows, ]
+  if (n_incomplete > 0) {
+    message(paste0(n_incomplete, " of your observations contain missing values for either `yy`, `xx`, `xstar`, or covariates within `formula`. These observations will be dropped from the analysis."))
+  }
 
   ################################################
   ## fit the model with Poisson regression
