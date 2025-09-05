@@ -205,6 +205,13 @@ fit_mgx_model <- function(
   if (n_incomplete > 0) {
     message(paste0(n_incomplete, " of your observations contain missing values for either `yy`, `xx`, `xstar`, or covariates within `formula`. These observations will be dropped from the analysis."))
   }
+  # if after this cleaning there is still an NA, it cannot be wt, id, xx, xstar, predictor, of any
+  # covariate in the formula. Therefore it must be an irrelevant covariate, and we don't want raoBust
+  # to drop that sample, so we will remove this covariate
+  if (sum(is.na(my_df)) > 0) {
+    var_to_rm <- which(colSums(is.na(my_df)) > 0)
+    my_df <- my_df[, -var_to_rm]
+  }
 
   ################################################
   ## fit the model with Poisson regression
