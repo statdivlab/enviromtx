@@ -1,6 +1,6 @@
 Package: enviromtx
 Title: Predicting Species-Species Interactions from Environmental Metatranscriptomics Data
-Version: 1.1.0
+Version: 1.2.0
 Authors@R: 
     c(person("Amy D", "Willis", email = "adwillis@uw.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-2802-4317")),
       person("Sarah", "Teichman", role = "aut"),
