@@ -10,4 +10,4 @@ This is a major release that requires a new release of `raoBust` which performs 
 
 ## Minor changes
 
-* `fit_mgx_model` now includes a `control` argument. One possible inclusion in the `control` argument is `center`. This is by default `FALSE`, but when it is `TRUE` all covariates will be centered before fitting the model. This should have very small if any effects on estimation, but could affect stability. 
+* `fit_mgx_model` now includes a `control` argument. One possible inclusion in the `control` argument is `center`. This is by default `FALSE`. When `TRUE` all covariates will be centered before fitting the model. This should have negligible effects on estimation, but may improve stability in rare cases. 
