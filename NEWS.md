@@ -1,3 +1,11 @@
+# enviromtx 1.2.0
+
+This is a minor release that provides a vignette and an example dataset. 
+
+## Minor changes
+
+* `example_data` is added and documented, "intro_enviromtx.Rmd" vignette is added. 
+
 # enviromtx 1.1.0
 
 This is a minor release that provides the option of centering covariates.

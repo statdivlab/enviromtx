@@ -1,6 +1,6 @@
 Package: enviromtx
 Title: Predicting Species-Species Interactions from Environmental Metatranscriptomics Data
-Version: 1.1.0
+Version: 1.2.0
 Authors@R: 
     c(person("Amy D", "Willis", email = "adwillis@uw.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-2802-4317")),
       person("Sarah", "Teichman", role = "aut"),
@@ -8,6 +8,8 @@ Authors@R:
 Description: Tools to answer the question: Does the abundance of a given species impact another species' expression of a gene? 
 License: MIT + file LICENSE
 Suggests: 
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
@@ -21,3 +23,7 @@ Imports:
     raoBust (>= 1.1.1),
     tibble
 Remotes: statdivlab/raoBust
+Depends: 
+    R (>= 3.5)
+LazyData: true
+VignetteBuilder: knitr
